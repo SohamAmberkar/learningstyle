@@ -34,7 +34,7 @@ Click "Advanced settings" to:
 In the "Advanced settings" → "Secrets" section, add:
 
 ```toml
-GEMINI_API_KEY = "AIzaSyDBgISdC9dlz0uWP5trjx13vL7Va53TlOQ"
+GEMINI_API_KEY = "your_API_key"
 ```
 
 Then update `app.py` to read from Streamlit secrets:
