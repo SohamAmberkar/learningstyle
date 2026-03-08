@@ -1,0 +1,177 @@
+--- Page 1 ---
+AI-DRIVEN
+LEARNING STYLE PREDICTION FOR ADAPTIVE E-
+LEARNING SYSTEMS
+TEAM MEMBERS: 22BCEH74 Urvi Shah
+22BCE1350 Manas Dutt
+GUIDE' S NAME: Dr: Vijayalakshmi A
+
+--- Page 2 ---
+AREA OF THE DOMAIN
+Educational Data Mining
+Machine Learning in Education
+Adaptive Learning Systems
+Learning Analytics &Personalization
+01
+
+--- Page 3 ---
+BACKGROUND
+Online education (MOOCs, LMS) is rapidly growing but
+often treats every student the same.
+Research shows personalized instruction, tailored to
+student learning styles, improves engagement and
+outcomes:
+Traditional identification uses static, self-report surveys
+impractical, biased, and not scalable.
+Advances in Al now enable real-time, behavior-based
+learning style detection:
+02
+
+--- Page 4 ---
+RESEARCH GAPS
+1.Noscalable; real-time learuing_style detectiou in LMS: Most platforms lack
+automated, real-time systems for identifying diverse learning styles, still relying
+on
+static, biased, and unscalable questionnaires.
+2. Underuse_of advanced ML techniques: Modern post-202O machine learning
+methods (hybrid-optimizer neural networks, graph learning with
+clustering; ensemble boosting like LightGBMICatBoost)
+remain largely
+unexplored in educational data mining, which favors older models.
+3. Scarcity_oflabeled data and labeling solutions: There is a persistent lack of
+accurately labeled learning style data in large-scale educational settings, and
+limited adoption of semi-supervised or weak-labeling methods that use
+behavioral data.
+4.Lack of explainability_and actionable insights: Most models offer little
+interpretability for educators; explainable Al techniques connecting predictions
+to
+practical instructional actions are underdeveloped:
+09
+fuzzy
+
+--- Page 5 ---
+PROBLEM
+STATEMENT
+Existing LMS lack automated, real-time, and scalable
+systems to identify and support diverse learning styles.
+Most methods depend on lengthy questionnaires or small
+datasets_
+There is a need for a scalable, robust solution that infers
+learning
+from real behavior, using minimal labeled
+data.
+03
+styles
+
+--- Page 6 ---
+OBJECTIVE
+Develop an AI-based system to predict students' learning
+styles using LMS interaction
+Leverage semi-supervised learning to work effectively
+with limited labeled data.
+Map behavioral features to the Felder-Silverman
+Learning Style Model(FSLSM):
+Build a dashboard for faculty to visualize learning style
+distributions in classes
+04
+logs.
+
+--- Page 7 ---
+PROPOSED METHODOLOGY
+DataCollection: Extract anonymized student activity
+(video views, quizzes,
+forums) from LMSIdataset.
+Feature Engineering: Design features aligned with FSLSM axes.
+DataPreprocessing: Handle missing data, balance classes
+SMOTE).
+Modeling:
+1. Hybrid Optimizer-based Neural Networks
+2. Graph Representation Learning +
+C-Means Clustering
+3 . Modern Ensemble Boosting Methods (LightGBM, CatBoost)
+Use semi-supervised self-training for leveraging unlabeled data:
+Apply ensemble modeling for improved accuracy.
+Evaluation: Use metrics (accuracy, precision , recall), and ensure explainability
+with SHAP.
+Deployment: Develop dashboard/plugin prototype for faculty insights.
+05
+logs
+(using
+Fuzzy
+
+--- Page 8 ---
+TOOLS AND TECHNOLOGIES
+Python (scikit-learn, pandas, numpy, SHAP,imbalanced-learn)
+Machine Learning Algorithms:
+1. Hybrid Optimizer-based Neural Networks
+2. Graph Representation Learning + Fuzzy €-Means Clustering
+3 . Modern Ensemble
+Boosting Methods (LightGBM, CatBoost)
+Ensemble Methods
+Jupyter Notebooks
+LMS(Moodle)MOOC Dataset from GitHub
+Visualization: matplotlib, seaborn, Tableau (optional)
+Git&GitHub for version control
+06
+
+--- Page 9 ---
+EXPECTED OUTCOME
+Achieve >85% learning style prediction accuracy
+(benchmarking with IEEE TLT 2024).
+Enable scalable, automated, and explainable detection
+forreal-world e-learning:
+Provide actionable insights to instructors for
+personalized teaching:
+a
+foundation for adaptive content delivery and
+reducing student dropout:
+07
+Lay
+
+--- Page 10 ---
+WORKPLAN
+Phase
+Weeks
+Literature Review
+Data Acquisition
+Feature Engineering/Preprocessing
+3-4
+Modeling
+5
+Evaluation &
+Dashboard Development
+Report & Presentation
+8
+08
+Tuning
+
+--- Page 11 ---
+REFERENCES
+1IEEE Transactions on
+Learning Technologies (2024). "Learning Style
+Identification
+Semisupervised Self-Taught Deep Learning and Ensemble
+Approach:
+DOI: 10.H109/TLT.2024.3358864
+https llieeexplore ieee_org/document/9358864
+2. Felder, R_
+M.
+& Silverman, L
+K. (1988). "Learning and Teaching Styles in
+Engineering Education. " https ILwww engL ncSLedulwp
+contentluploads/20L3/LOlearningstyles pdf
+3. Saheen Usman et al. GitHub Dataset: "Learning-style-prediction-identification-
+using Machine-Learning " https Igithubcom/saheenusman Learning-stylez
+prediction-identification-using_Machine-Learning
+4. Hmedna, B. GitHub Repository: "Learning-Styles-prediction_
+https Igithub com/Br-Hmedna/Learning-Styles-prediction
+5.Dataset: "Learning-style-prediction-identification-using-Machine-Learning"
+https ILgithub com/saheenusman/Learning-style-prediction-identification-using:
+Machine-Learning
+08
+Using
+
+--- Page 12 ---
+THANK YOU
+10
+

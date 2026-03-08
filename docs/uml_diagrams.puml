@@ -1,0 +1,99 @@
+%% =======================================================
+%% UML / PlantUML Diagrams for CPL-LS Paper
+%% =======================================================
+
+%% -------------------------------------------------------
+%% DIAGRAM 1: Complete System Architecture (Activity/Flow Diagram)
+%% -------------------------------------------------------
+@startuml architecture_diagram
+skinparam backgroundColor #FEFEFE
+skinparam activityBackgroundColor #E3F2FD
+skinparam activityBorderColor #1565C0
+skinparam arrowColor #37474F
+skinparam noteBorderColor #78909C
+
+title **System Architecture for AI-Driven Learning Style Prediction**
+
+start
+:Raw LMS Interaction Logs;
+
+partition "**Data Preprocessing**" {
+    :Extract 17 Behavioral Features;
+    :Map to 4 Binary FSLSM Targets;
+    :Handle Class Imbalance (SMOTE);
+    :Fuzzy C-Means Feature Augmentation;
+    :Split Data (80% Train, 20% Test);
+    :Mask 30% of Train Labels (Unlabeled Pool);
+}
+
+partition "**Semi-Supervised Competitive Training (per FSLSM Dimension)**" {
+    :Hyperparameter Tuning (Optuna);
+    
+    fork
+        :XGBoost-CPL;
+        note left: **Novelty (CPL-LS)**:\nCurriculum thresholding\ninstead of fixed target
+    fork again
+        :CatBoost-CPL;
+    fork again
+        :KAN-CPL;
+    end fork
+    
+    :Select Best CPL Model as Teacher;
+    :Teacher Pseudo-labels Unlabeled Pool;
+    :Train TabNet on Labeled + Pseudo-Labeled;
+    :Evaluate Models on Test Set;
+    :Select Best Model per Dimension;
+}
+
+partition "**Explainability & Deployment**" {
+    fork
+        :SHAP Analysis (Tree models);
+    fork again
+        :Integrated Gradients (Neural models);
+    end fork
+    :Interactive Dashboard (Student & Faculty Views);
+}
+
+stop
+@enduml
+
+
+%% -------------------------------------------------------
+%% DIAGRAM 2: CPL-LS Novelty Process Diagram
+%% -------------------------------------------------------
+@startuml cpl_process_diagram
+skinparam backgroundColor #FEFEFE
+skinparam activityBackgroundColor #E8F5E9
+skinparam activityBorderColor #2E7D32
+skinparam activityDiamondBackgroundColor #FFF9C4
+skinparam activityDiamondBorderColor #F57F17
+skinparam arrowColor #37474F
+
+title **Curriculum Pseudo-Labeling (CPL-LS) Process**
+
+start
+:Initialize Base Model on Labeled Set (L);
+:Set parameters (τ_ref = 0.95, warmup_threshold);
+
+repeat
+    :Predict Probabilities on Unlabeled Set (U);
+    :Calculate Class Learning Effect σ_t(c);
+    note right: Proxy for how well each\nclass has been learned
+    
+    if (Is model in warm-up phase?) then (yes)
+        :Set Thresholds T_t(c) = 0;
+        note left: Prevent early data starvation
+    else (no)
+        :Normalize: β_t(c) = σ_t(c) / max(σ_t);
+        :Dynamic Threshold: T_t(c) = β_t(c) * τ_ref;
+        note left: Flexible class-specific thresholds\n(easy vs hard classes)
+    endif
+    
+    :Select Pseudo-Labels > T_t(c);
+    :Add to Labeled Pool;
+    :Retrain Model;
+
+repeat while (Convergence Criteria Met?) is (no)
+
+stop
+@enduml
