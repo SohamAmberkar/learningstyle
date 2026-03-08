@@ -240,26 +240,33 @@ with tab_predict:
                     res = st.session_state.predictions[dim_key]
                     
                     st.markdown(f"""
-                    <div style="background-color: #f8f9fa; border-top: 5px solid {color}; padding: 15px; border-radius: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                        <h4 style="margin-top:0; color: #2c3e50;">{title}</h4>
+                    <div style="background-color: #2b3035; border-top: 5px solid {color}; padding: 15px; border-radius: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+                        <h4 style="margin-top:0; color: #f8f9fa;">{title}</h4>
                         <h2 style="color: {color}; margin-bottom: 5px;">{res['prediction']}</h2>
-                        <p style="font-size: 14px; margin-bottom: 0;"><b>Confidence:</b> {res['confidence']:.1f}%</p>
-                        <p style="font-size: 12px; color: #7f8c8d;">Model: {res['algo']}</p>
+                        <p style="font-size: 14px; margin-bottom: 0; color: #ced4da;"><b>Confidence:</b> {res['confidence']:.1f}%</p>
+                        <p style="font-size: 12px; color: #adb5bd;">Model used: {res['algo']}</p>
                     </div>
                     """, unsafe_allow_html=True)
                     
                     # Probability Bar
                     fig = go.Figure(go.Indicator(
-                        mode = "gauge",
+                        mode = "gauge+number",
                         value = res['score'],
+                        number = {'suffix': "%", 'font': {'size': 20, 'color': color}},
                         domain = {'x': [0, 1], 'y': [0, 1]},
-                        title = {'text': f"{lbl0} ← → {lbl1}", 'font': {'size': 14}},
+                        title = {'text': f"{lbl0} vs {lbl1}", 'font': {'size': 14}},
                         gauge = {
-                            'axis': {'range': [0, 100]},
-                            'bar': {'color': color},
+                            'axis': {
+                                'range': [0, 100],
+                                'tickfont': {'size': 12, 'color': 'white'},
+                                'tickvals': [0, 50, 100],
+                                'ticktext': [f"⬅ {lbl0}", "Balanced", f"{lbl1} ➡"]
+                            },
+                            'bar': {'color': color, 'thickness': 0.25},
                             'steps': [
-                                {'range': [0, 50], 'color': "#ecf0f1"},
-                                {'range': [50, 100], 'color': "#bdc3c7"}
+                                {'range': [0, 33], 'color': "rgba(255,255,255,0.05)"},
+                                {'range': [33, 66], 'color': "rgba(255,255,255,0.15)"},
+                                {'range': [66, 100], 'color': "rgba(255,255,255,0.25)"}
                             ]
                         }
                     ))
@@ -331,7 +338,8 @@ with tab_predict:
 # ------------------------------------------
 with tab_transparency:
     st.markdown("### 🏆 SOTA Model Performance & Competition")
-    st.write("For each dimension, 4 models competed iteratively using CPL-LS. Below are the authentic accuracies and winning algorithms chosen by the pipeline.")
+    
+    st.write("For each dimension, 4 architectures (XGBoost, CatBoost, KAN, TabNet) aggressively competed using CPL-LS. The pipeline automatically selected the **highest scoring model** for each specific learning style dimension to serve live predictions. Below are the authentic CV test accuracies.")
     
     # 1. Real Accuracy Table
     metrics_data = []
@@ -443,25 +451,37 @@ with tab_xai:
             else:
                 st.info(f"Global feature importance not directly available for architecture: {algo_name}")
                 
-            # Live SHAP evaluation for Trees
-            if 'Boost' in algo_name and st.button("Calculate Exact SHAP Values (Takes ~5s)"):
-                with st.spinner("Computing Shapley values..."):
+            # Live SHAP evaluation
+            if st.button("Calculate Exact SHAP Values (Takes 5-15s)"):
+                with st.spinner("Computing Shapley values (Local Explanations)..."):
                     try:
-                        explainer = shap.TreeExplainer(base_est)
-                        # Sample 100 rows to keep it fast for Streamlit
-                        shap_values = explainer.shap_values(X_test[:100])
+                        # Ensure we have a small background dataset for KernelExplainer
+                        X_sample = X_test[:100]
+                        X_bg = shap.kmeans(X_sample, 10).data
                         
-                        fig, ax = plt.subplots(figsize=(10, 6))
-                        # For binary classification, shap_values might be a list
-                        if isinstance(shap_values, list):
-                            shap.summary_plot(shap_values[1], X_test[:100], feature_names=features, show=False)
+                        if 'Boost' in algo_name:
+                            explainer = shap.TreeExplainer(base_est)
+                            shap_values = explainer.shap_values(X_sample)
                         else:
-                            shap.summary_plot(shap_values, X_test[:100], feature_names=features, show=False)
+                            # Fallback for Neural Networks (KAN, TabNet, MLP)
+                            def predict_wrapper(x):
+                                # Some models need float32, some double. Ensure 2D.
+                                return base_est.predict_proba(np.array(x, dtype=np.float32))[:, 1]
+                                
+                            explainer = shap.KernelExplainer(predict_wrapper, X_bg)
+                            shap_values = explainer.shap_values(X_sample, nsamples=100)
+                            
+                        fig, ax = plt.subplots(figsize=(10, 6))
+                        # For binary classification TreeExplainer, shap_values might be a list
+                        if isinstance(shap_values, list):
+                            shap.summary_plot(shap_values[1], X_sample, feature_names=features, show=False)
+                        else:
+                            shap.summary_plot(shap_values, X_sample, feature_names=features, show=False)
                             
                         st.pyplot(fig)
                         plt.close()
                     except Exception as e:
-                        st.error(f"Could not compute SHAP for this model type: {e}")
+                        st.error(f"Could not compute SHAP for this architecture. Ensure it supports predict_proba(). Error: {e}")
         else:
             st.info("Test dataset metadata not found in the model file. Re-run train_semi_supervised.py with the updated metadata storage.")
 

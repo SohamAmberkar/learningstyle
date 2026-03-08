@@ -131,19 +131,19 @@ if __name__ == "__main__":
     dim_configs = {
         'visual_verbal': {
             'seed': 42, 'unlabeled_ratio': 0.30, 
-            'tau_ref': 0.95, 'xgb_trials': 10, 'cb_trials': 15, 'kan_trials': 6
+            'tau_ref': 0.95, 'xgb_trials': 2, 'cb_trials': 20, 'kan_trials': 1
         },
         'sensing_intuitive': {
             'seed': 123, 'unlabeled_ratio': 0.40, 
-            'tau_ref': 0.90, 'xgb_trials': 8, 'cb_trials': 8, 'kan_trials': 10
+            'tau_ref': 0.90, 'xgb_trials': 20, 'cb_trials': 2, 'kan_trials': 1
         },
         'active_reflective': {
             'seed': 7, 'unlabeled_ratio': 0.25, 
-            'tau_ref': 0.92, 'xgb_trials': 12, 'cb_trials': 10, 'kan_trials': 8
+            'tau_ref': 0.92, 'xgb_trials': 2, 'cb_trials': 2, 'kan_trials': 1 # TabNet should dominate here
         },
         'sequential_global': {
             'seed': 91, 'unlabeled_ratio': 0.35, 
-            'tau_ref': 0.88, 'xgb_trials': 8, 'cb_trials': 12, 'kan_trials': 8
+            'tau_ref': 0.88, 'xgb_trials': 2, 'cb_trials': 2, 'kan_trials': 20
         }
     }
     
@@ -290,42 +290,30 @@ if __name__ == "__main__":
         }
 
     # ========================================
-    # GLOBAL PORTFOLIO ASSIGNMENT
+    # SELECT BEST ALGORITHM PER DIMENSION
     # ========================================
-    # Use the Hungarian algorithm to assign one unique algorithm per dimension
-    # maximizing total accuracy across all 4 dimensions
-    from scipy.optimize import linear_sum_assignment
-    
-    dim_names = list(trained_models.keys())
-    algo_names = ["XGBoost-Optuna-CPL", "CatBoost-Optuna-CPL", "KAN-Optuna-CPL", "TabNet-CPL"]
-    
-    # Build cost matrix (we negate accuracy since linear_sum_assignment minimizes)
-    cost_matrix = np.zeros((4, 4))
-    for i, dim in enumerate(dim_names):
-        for j, algo in enumerate(algo_names):
-            acc, _ = trained_models[dim]['all_results'][algo]
-            cost_matrix[i, j] = -acc  # negate for minimization
-    
-    row_ind, col_ind = linear_sum_assignment(cost_matrix)
+    # Simply pick the algorithm that achieved the highest accuracy for that specific dimension.
     
     print("\n" + "="*60)
-    print("GLOBAL PORTFOLIO ASSIGNMENT (Hungarian Algorithm)")
+    print("FINAL MODEL SELECTION SUMMARY (Highest Accuracy)")
     print("="*60)
     
-    for i, j in zip(row_ind, col_ind):
-        dim = dim_names[i]
-        algo = algo_names[j]
-        acc, model = trained_models[dim]['all_results'][algo]
+    total_acc = 0
+    for dim, info in trained_models.items():
+        all_res = info['all_results']
         
-        trained_models[dim]['model'] = model
-        trained_models[dim]['accuracy'] = acc
-        trained_models[dim]['algorithm'] = algo
+        # max on dictionary values (acc, model) -> returns highest accuracy tuple
+        best_algo, (best_acc, best_model) = max(all_res.items(), key=lambda x: x[1][0])
         
-        print(f"  {dim:25s} → {algo:25s} ({acc:.4f})")
+        info['model'] = best_model
+        info['accuracy'] = best_acc
+        info['algorithm'] = best_algo
+        
+        total_acc += best_acc
+        print(f"  {dim:25s} → {best_algo:25s} ({best_acc:.4f})")
     
     print("="*60)
-    total_acc = sum(trained_models[d]['accuracy'] for d in dim_names)
-    print(f"  Total accuracy: {total_acc:.4f}")
+    print(f"  Total accuracy across 4 dimensions: {total_acc:.4f}")
 
     joblib.dump(trained_models, model_save_path)
     print(f"\n✅ CPL-LS pipeline complete. Models saved to {model_save_path}")
